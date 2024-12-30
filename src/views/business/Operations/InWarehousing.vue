@@ -18,6 +18,13 @@
             <el-button icon="search" type="primary" @click="ReceipthandleQuery">{{ $t('btn.search') }}</el-button>
             <el-button icon="refresh" @click="ReceiptresetQuery">{{ $t('btn.reset') }}</el-button>
           </el-form-item>
+          <el-form-item>
+            <el-select filterable clearable v-model="Warehouseid" placeholder="请选择仓库">
+              <el-option v-for="item in Warehousesth" :key="item.dictValue" :label="item.dictLabel"
+                :value="item.dictValue">
+                <span class="fl">{{ item.dictLabel }}</span></el-option>
+            </el-select>
+          </el-form-item>
         </el-form>
         <el-col :span="1.5">
           <el-button type="primary" v-hasPermi="['warehousereceipt:add']" plain icon="plus" @click="ReceipthandleAdd">
@@ -26,10 +33,11 @@
         </el-col>
         <el-col :span="1.5">
           <el-button type="warning" plain icon="download" @click="ReceipthandleSubmithis"
-            v-hasPermi="['inwarehousing:export']">
+            v-hasPermi="['inwarehousing:add']">
             确认收货
           </el-button>
         </el-col>
+
       </el-row>
       <el-table @row-click="ReceiptDrugdatalist" :data="ReceiptdataList" v-loading="Receiptloading" ref="table" border
         header-cell-class-name="el-table-header-cell" highlight-current-row @sort-change="ReceiptsortChange"
@@ -54,6 +62,11 @@
           v-if="Receiptcolumns.showColumn('invoiceNumber')" />
         <el-table-column prop="supplierId" label="供应商" align="center" :show-overflow-tooltip="true"
           v-if="Receiptcolumns.showColumn('supplierId')" />
+        <el-table-column prop="mark" label="备注" align="center" :show-overflow-tooltip="true"
+          v-if="Receiptcolumns.showColumn('mark')" />
+        <el-table-column prop="hisBuyCode" label="His采购单号" align="center" :show-overflow-tooltip="true"
+          v-if="Receiptcolumns.showColumn('hisBuyCode')" />
+
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="scope">
             <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['warehousereceipt:edit']"
@@ -107,7 +120,6 @@
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.inventoryQuantity" size="small" class="inputs"
                   :style="{ color: 'red' }" @blur="DrugQuantityChange(row)" />
               </template>
-
             </el-table-column>
             <el-table-column prop="tracingSourceCode" label="药品溯源码" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('tracingSourceCode')" />
@@ -116,7 +128,6 @@
               <template #default="{ row }">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.batchNumber" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
-
               </template>
               <!-- @blur="DrugQuantityChange(row)" -->
             </el-table-column>
@@ -131,9 +142,7 @@
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.exprie" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
               </template>
-
             </el-table-column>
-
             <el-table-column prop="price" label="价格" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('price')">
               <template #default="{ row }">
@@ -159,9 +168,16 @@
             </el-table-column>
             <el-table-column prop="minunit" label="最小单位" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('minunit')" />
-
+            <el-table-column prop="packageRatio" label="转换系数" align="center"
+              v-if="columns.showColumn('packageRatio')" />
+            <el-table-column prop="packageUnit" label="包装单位" align="center" :show-overflow-tooltip="true"
+              v-if="columns.showColumn('packageUnit')" />
             <el-table-column label="操作" width="120" fixed="right">
               <template #default="scope">
+                <!-- <el-button type="primary" size="small" icon="edit" title="编辑" v-hasPermi="['inwarehousing:add']"
+                  @click="CodehandleAdd(scope.row)"></el-button> -->
+                <el-button :disabled="Rstate.value == '已推送'" type="success" size="small" icon="edit" title="编辑"
+                  v-hasPermi="['inwarehousing:edit']" @click="handleUpdate(scope.row)"></el-button>
                 <el-button :disabled="Rstate.value == '已推送'" type="success" size="small" icon="FullScreen" title="扫码添加"
                   v-hasPermi="['inwarehousing:add']" @click="CodeScreenAdd(scope.row)"></el-button>
                 <el-button :disabled="Rstate.value == '已推送'" type="primary" size="small" icon="edit" title="手动添加"
@@ -388,6 +404,7 @@
                 </el-option>
               </el-select>
             </el-form-item> -->
+
             <el-form-item label="供应商" prop="supplierId">
               <el-select v-model="Receiptform.supplierId" placeholder="请选择供应商" filterable remote
                 :remote-method="fetchSuppliers" :loading="resloading" clearable>
@@ -397,7 +414,17 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :span="1.5">
+            <el-form-item label="仓库" prop="Warehouseid">
 
+              <el-select clearable v-model="Warehouseid" placeholder="请选择仓库">
+                <el-option v-for="item in Warehouseoptions.warehouseidOpitons" :key="item.dictValue"
+                  :label="item.dictLabel" :value="item.dictValue">
+                  <span class="fl">{{ item.dictLabel }}</span></el-option>
+              </el-select>
+            </el-form-item>
+
+          </el-col>
           <el-col :lg="12">
             <el-form-item label="入库时间" prop="storageTime">
               <el-input v-model="Receiptform.storageTime" placeholder="请输入入库时间" />
@@ -432,7 +459,16 @@
               <el-input v-model="Receiptform.state" placeholder="请输入状态" />
             </el-form-item>
           </el-col>
-
+          <el-col :lg="12">
+            <el-form-item label="备注" prop="mark">
+              <el-input v-model="Receiptform.mark" placeholder="请输入备注" />
+            </el-form-item>
+          </el-col>
+          <el-col :lg="12">
+            <el-form-item label="His采购单号" prop="hisBuyCode">
+              <el-input v-model="Receiptform.hisBuyCode" placeholder="请输入His采购单号" />
+            </el-form-item>
+          </el-col>
 
         </el-row>
       </el-form>
@@ -442,7 +478,7 @@
       </template>
     </el-dialog>
     <!-- 药品选择 -->
-    <el-dialog :title="title" :lock-scroll="false" v-model="open">
+    <el-dialog :title="oDrugtitle" :lock-scroll="false" v-model="oDrugopen">
       <el-form :model="DrugqueryParams" label-position="right" inline ref="DrugqueryRef" v-show="DrugshowSearch"
         @submit.prevent>
         <el-form-item label="药品名称" prop="drugName">
@@ -490,13 +526,14 @@
           v-if="Drugcolumns.showColumn('packageRatio')" />
         <el-table-column prop="packageUnit" label="包装单位" align="center" :show-overflow-tooltip="true"
           v-if="Drugcolumns.showColumn('packageUnit')" />
+        <el-table-column prop="hisPrice" label="HIS价格" align="center" v-if="Drugcolumns.showColumn('hisPrice')" />
 
       </el-table>
       <pagination :total="Drugtotal" v-model:page="DrugqueryParams.pageNum" v-model:limit="DrugqueryParams.pageSize"
         @pagination="DruggetList" />
       <template #footer v-if="opertype != 3">
-        <el-button text @click="cancel">{{ $t('btn.cancel') }}</el-button>
-        <el-button type="primary" @click="submitForm">{{ $t('btn.submit') }}</el-button>
+        <el-button text @click="oDrugcancel">{{ $t('btn.cancel') }}</el-button>
+        <el-button type="primary" @click="oDrugsubmitForm">{{ $t('btn.submit') }}</el-button>
       </template>
 
     </el-dialog>
@@ -723,7 +760,6 @@ const levelMap = {
   11: '中码',
   21: '大码',
   31: '',
-
 };
 const columns = ref([
   { visible: false, align: 'center', type: '', prop: 'id', label: 'id' },
@@ -742,7 +778,8 @@ const columns = ref([
   { visible: true, align: 'center', type: '', prop: 'locationNumber', label: '货位号' },
   { visible: true, align: 'center', type: '', prop: 'dateOfManufacture', label: '生产日期' },
   { visible: true, align: 'center', type: '', prop: 'minunit', label: '最小单位' },
-
+  { visible: true, align: 'center', type: '', prop: 'packageRatio', label: '转换系数' },
+  { visible: true, align: 'center', type: '', prop: 'packageUnit', label: '包装单位', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const total = ref(0)
@@ -766,6 +803,8 @@ function getList() {
       loading.value = false
     }
   })
+
+
 }
 
 // 查询
@@ -797,6 +836,9 @@ function sortChange(column) {
 /*************** form操作 ***************/
 const formRef = ref()
 const title = ref('')
+const oDrugtitle = ref('')
+const oDrugopen = ref(false)
+
 // 操作类型 1、add 2、edit 3、view
 const opertype = ref(0)
 const open = ref(false)
@@ -814,8 +856,8 @@ const state = reactive({
 const { form, rules, options, single, multiple } = toRefs(state)
 
 // 关闭dialog
-function cancel() {
-  open.value = false
+function oDrugcancel() {
+  oDrugopen.value = false
   reset()
 }
 
@@ -863,8 +905,9 @@ function handlePreview(row) {
 // 添加按钮操作
 function handleAdd() {
   reset();
-  open.value = true
-  title.value = '添加入库信息'
+  oDrugopen.value = true
+  oDrugtitle.value = '添加入库信息'
+  // oDrug
   opertype.value = 1
   DrugresetQuery()
 
@@ -894,13 +937,13 @@ function handleUpdate(row) {
 }
 
 // 添加&修改 表单提交 获取选择的入库单号 进行填充
-function submitForm() {
+function oDrugsubmitForm() {
   // queryParams.receiptId
   // if (form.value.id != undefined && opertype.value === 1) {
   // console.log(FictitiousDrugData.value)
   addInWarehousing(FictitiousDrugData.value).then((res) => {
     proxy.$modal.msgSuccess("新增成功")
-    open.value = false
+    oDrugopen.value = false
     getList()
     DrugresetQuery()
   })
@@ -911,7 +954,7 @@ function submitForm() {
 function handleDelete(row) {
   const Ids = row.id || ids.value
   proxy
-    .$confirm('是否确认删除参数编号为"' + Ids + '"的数据项？', "警告", {
+    .$confirm('是否确认删除"' + row.drugName + '"的药品？', "警告", {
       confirmButtonText: proxy.$t('common.ok'),
       cancelButtonText: proxy.$t('common.cancel'),
       type: "warning",
@@ -970,9 +1013,8 @@ const Receiptcolumns = ref([
   { visible: true, align: 'center', type: '', prop: 'state', label: '状态', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'state', label: '状态', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'supplierId', label: '供应商', showOverflowTooltip: true },
-
-
-
+  { visible: true, align: 'center', type: '', prop: 'mark', label: '备注', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'hisBuyCode', label: 'His采购单号', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const Receipttotal = ref(0)
@@ -1099,6 +1141,8 @@ const fetchSuppliers = async (query) => {
         dictLabel: item.supplierName,
         dictValue: item.id,
       }));
+      console.error(suppliers.value);
+
       // hasMore.value = response.data.totalPage > response.data.pageIndex; // 判断是否有更多数据
     }
   } catch (error) {
@@ -1129,6 +1173,8 @@ function Receiptreset() {
     state: null,
     invoiceNumber: null,
     supplierId: null,
+    mark: null,
+    hisBuyCode: null,
   };
   proxy.resetForm("ReceiptformRef")
 }
@@ -1288,11 +1334,11 @@ const Codecolumns = ref([
   { visible: false, align: 'center', type: '', prop: 'packageLevel', label: '码等级', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'physicName', label: '药品名称', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'exprie', label: '有效期', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'drugEntBaseInfoId', label: '药品id', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'approvalLicenceNo', label: '批准文号', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'pkgSpecCrit', label: '包装规格', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'prepnSpec', label: '制剂规格', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'prepnTypeDesc', label: '剂型描述', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'drugEntBaseInfoId', label: '药品id', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'approvalLicenceNo', label: '批准文号', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'pkgSpecCrit', label: '包装规格', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'prepnSpec', label: '制剂规格', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'prepnTypeDesc', label: '剂型描述', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'produceDateStr', label: '生产日期', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'pkgAmount', label: '最小包装数量', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'expireDate', label: '有效期至', showOverflowTooltip: true },
@@ -1485,25 +1531,24 @@ import axios from 'axios';
 const handleInput = () => {
   console.log('正在输入:', FUllcodeform.value.Code);
 
-  // 清除之前的定时器
   if (typingTimeout) {
     clearTimeout(typingTimeout);
   }
 
-  // 设置新的定时器，在用户输入停止后延迟处理
+
   typingTimeout = setTimeout(() => {
     console.log('输入结束值：', FUllcodeform.value.Code);
-    //调用本地方法
+
     fetchData(FUllcodeform.value.Code)
     getAllMixCodedataList(FUllcodeform.value.Code)
     console.log('接口返回数据2：', AllMixCodedataList.value);
 
-  }, 200); // 延迟时间（300ms），可以根据需要调整
+  }, 200);
 };
 
 // 处理失去焦点
 const handleBlur = () => {
-  // 清除定时器，确保在失去焦点时处理最终值
+
   if (typingTimeout) {
     clearTimeout(typingTimeout);
     console.log('输入结束值（失去焦点）：', FUllcodeform.value.Code);
@@ -1551,16 +1596,12 @@ const fetchData = async (code) => {
 // 添加按钮操作
 function CodehandleAdd(row) {
   Codereset();
-
   Codeopen.value = true
-
   Codetitle.value = '添加码信息'
   Codeopertype.value = 1
-
   Codeform.value.Receiptid = queryParams.receiptId
   Codeform.value.DrugId = row.drugId
   Codeform.value.InWarehouseId = row.id
-
 }
 // 修改按钮操作
 function CodehandleUpdate(row) {
@@ -1744,6 +1785,7 @@ const Drugcolumns = ref([
   { visible: true, align: 'center', type: '', prop: 'minunit', label: '最小单位', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'produceName', label: '生产厂家', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'packageRatio', label: '转换系数' },
+  { visible: true, align: 'center', type: '', prop: 'hisPrice', label: 'HIS价格' },
   { visible: true, align: 'center', type: '', prop: 'packageUnit', label: '包装单位', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
@@ -1814,7 +1856,8 @@ function DrughandleSelectionChange(selection) {
     return {
       ...item,         // 保留原始对象的其他属性
       ReceiptId: queryParams.receiptId, // 添加 redid 属性，假设你要用索引值+1作为 redid
-      ManufacturerId: item.produceName
+      ManufacturerId: item.produceName,
+      Price: item.hisPrice
     };
   });
 }
@@ -1906,10 +1949,48 @@ function handleSelectionChange(selection) {
   Receiptsingle.value = selection.length != 1
   Receiptmultiple.value = !selection.length;
 }
-//qrsh
+// //qrsh
+// function ReceipthandleSubmithis() {
+//   Warehouseid
+// }
+// 添加&修改 表单提交
 function ReceipthandleSubmithis() {
-  Warehouseopen.value = true
-  Warehousetitle.value = "选择仓库"
+  //选择一个单据
+  if (Warehouseid != null && Receiptids.value.length > 0) {
+    proxy
+      .$confirm("是否确认收货" + (Receiptids.value.length) + "个单据?", "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+      .then(() => {
+        //获取仓库编码 获取 入库单信息 获取
+        sendOutData.value.warehouseId = Warehouseid
+        sendOutData.value.receiptIds = Receiptids.value
+        sendOutData.value.warehousecode = Warehouseid
+
+        // console.log(sendOutData.value)
+        // sendOutData.value.
+        //数据分析
+        //传递单据
+        sendOutWarehouseReceipt(sendOutData.value).then((res) => {
+          proxy.$modal.msgSuccess('发送成功')
+          Warehouseopen.value = false
+          Receiptopen.value = false
+          ReceiptgetList()
+        })
+      }
+      )
+  } else if (Warehouseids.value.length > 1) {
+    proxy.$modal.msgWarning("只能选择一个仓库");
+  } else if (Receiptids.value.length <= 0) {
+    proxy.$modal.msgWarning("需选择入库单");
+
+  } else {
+    proxy.$modal.msgWarning("请选择一个仓库");
+
+  }
+
 
 }
 
@@ -1949,13 +2030,22 @@ const WarehousedefaultTime = ref([new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 
 
 var WarehousedictParams = [
 ]
-
-
+const Warehouseid = ref('44');
+const Warehousesth = ref([]);
 function WarehousegetList() {
   Warehouseloading.value = true
   listWarehouse(WarehousequeryParams).then(res => {
     const { code, data } = res
     if (code == 200) {
+      // console.log(data.result)
+      // Warehouseoptions.warehouseidOpitons = data.result.map(item => ({
+      //   dictLabel: item.name,   // 替换为实际的标签属性
+      //   dictValue: item.id,    // 替换为实际的值属性
+      // }));
+      Warehousesth.value = data.result.map(item => ({
+        dictLabel: item.name,   // ��换为实际的标签属性
+        dictValue: item.code,    // ��换为实际的值属性
+      }));
       WarehousedataList.value = data.result
       Warehousetotal.value = data.totalNum
       Warehouseloading.value = false
@@ -1963,6 +2053,22 @@ function WarehousegetList() {
   })
 }
 
+function Warehouseget() {
+  WarehousequeryParams.pageSize = 999
+  listWarehouse(WarehousequeryParams).then(res => {
+    const { code, data } = res
+    if (code == 200) {
+      Warehousesth.value = data.result.map(item => ({
+        dictLabel: item.name,
+        dictValue: item.id,
+      }));
+    }
+    console.log(Warehousesth.value)
+  })
+}
+onMounted(() => {
+  Warehouseget();
+});
 // 查询
 function WarehousehandleQuery() {
   WarehousequeryParams.pageNum = 1
@@ -2005,6 +2111,7 @@ const Warehousestate = reactive({
   Warehouseoptions: {
     // 状态 选项列表 格式 eg:{ dictLabel: '标签', dictValue: '0'}
     stateOptions: [],
+    warehouseidOpitons: [], //
   }
 })
 
@@ -2201,7 +2308,7 @@ const getAllMixCodedataList = async (code) => {
     const response = await axios.get('http://119.145.169.162:50088/Mtaobo/AllMIXcode', {
       params: { codes: code }
     });
-    console.log(`接口返回shuju${response.data.data}`)
+
 
     //console.log('接口返回数据3：', response);
     AllMixCodedataList.value = response.data.data

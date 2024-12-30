@@ -23,6 +23,11 @@
     </el-form>
     <!-- 工具区域 -->
     <el-row :gutter="15" class="mb10">
+      <el-col :span="1.5">
+        <el-button type="primary" plain icon="plus" @click="DrugTongbu">
+          同步
+        </el-button>
+      </el-col>
       <!-- <el-col :span="1.5">
         <el-button type="primary" v-hasPermi="['drug:add']" plain icon="plus" @click="DrughandleAdd">
           {{ $t('btn.add') }}
@@ -244,7 +249,7 @@
     listDrug,
     addDrug, delDrug,
     updateDrug, getDrug,
-    clearDrug
+    clearDrug, Tongbu
   }
     from '@/api/business/drug.js'
   const { proxy } = getCurrentInstance()
@@ -528,4 +533,13 @@
   }
 
   DrughandleQuery()
+
+  function DrugTongbu() {
+    proxy.$modal.loading("请稍等")
+
+    Tongbu.then(result => {
+      proxy.$modal.closeLoading()
+
+    })
+  }
 </script>

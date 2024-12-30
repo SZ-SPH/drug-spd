@@ -20,6 +20,11 @@
     <!-- 工具区域 -->
     <el-row :gutter="15" class="mb10">
       <el-col :span="1.5">
+        <el-button type="primary" plain icon="plus" @click="manufacturerTongBu">
+          同步
+        </el-button>
+      </el-col>
+      <!-- <el-col :span="1.5">
         <el-button type="primary" v-hasPermi="['manufacturer:add']" plain icon="plus" @click="handleAdd">
           {{ $t('btn.add') }}
         </el-button>
@@ -54,48 +59,46 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
-        </el-dropdown>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['manufacturer:export']">
-          {{ $t('btn.export') }}
-        </el-button>
-      </el-col>
+</el-dropdown>
+</el-col>
+<el-col :span="1.5">
+  <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['manufacturer:export']">
+    {{ $t('btn.export') }}
+  </el-button>
+</el-col> -->
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table
-      :data="dataList"
-      v-loading="loading"
-      ref="table"
-      border
-      header-cell-class-name="el-table-header-cell"
-      highlight-current-row
-      @sort-change="sortChange"
-      @selection-change="handleSelectionChange"
-      >
-      <el-table-column type="selection" width="50" align="center"/>
-      <el-table-column prop="id" label="id" align="center" v-if="columns.showColumn('id')"/>
-      <el-table-column prop="name" label="名称" align="center" :show-overflow-tooltip="true" v-if="columns.showColumn('name')"/>
-      <el-table-column prop="code" label="编号" align="center" :show-overflow-tooltip="true" v-if="columns.showColumn('code')"/>
+    <el-table :data="dataList" v-loading="loading" ref="table" border header-cell-class-name="el-table-header-cell"
+      highlight-current-row @sort-change="sortChange" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="50" align="center" />
+      <el-table-column prop="id" label="id" align="center" v-if="columns.showColumn('id')" />
+      <el-table-column prop="name" label="名称" align="center" :show-overflow-tooltip="true"
+        v-if="columns.showColumn('name')" />
+      <el-table-column prop="code" label="编号" align="center" :show-overflow-tooltip="true"
+        v-if="columns.showColumn('code')" />
       <el-table-column label="操作" width="160">
         <template #default="scope">
           <el-button type="primary" size="small" icon="view" title="详情" @click="handlePreview(scope.row)"></el-button>
-          <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['manufacturer:edit']" @click="handleUpdate(scope.row)"></el-button>
-          <el-button type="danger" size="small" icon="delete" title="删除" v-hasPermi="['manufacturer:delete']" @click="handleDelete(scope.row)"></el-button>
+          <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['manufacturer:edit']"
+            @click="handleUpdate(scope.row)"></el-button>
+          <el-button type="danger" size="small" icon="delete" title="删除" v-hasPermi="['manufacturer:delete']"
+            @click="handleDelete(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
+    <pagination :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
+      @pagination="getList" />
 
 
-    <el-dialog :title="title" :lock-scroll="false" v-model="open" >
+    <el-dialog :title="title" :lock-scroll="false" v-model="open">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row :gutter="20">
-            
+
           <el-col :lg="12" v-if="opertype != 1">
             <el-form-item label="id" prop="id">
-              <el-input-number v-model.number="form.id" controls-position="right" placeholder="请输入id" :disabled="true"/>
+              <el-input-number v-model.number="form.id" controls-position="right" placeholder="请输入id"
+                :disabled="true" />
             </el-form-item>
           </el-col>
 
@@ -121,11 +124,13 @@
 </template>
 
 <script setup name="manufacturer">
-import { listManufacturer,
- addManufacturer, delManufacturer, 
- updateManufacturer,getManufacturer, 
- clearManufacturer,  } 
-from '@/api/business/manufacturer.js'
+import {
+  listManufacturer,
+  addManufacturer, delManufacturer,
+  updateManufacturer, getManufacturer,
+  clearManufacturer, TongBu
+}
+  from '@/api/business/manufacturer.js'
 import importData from '@/components/ImportData'
 const { proxy } = getCurrentInstance()
 const ids = ref([])
@@ -140,9 +145,9 @@ const queryParams = reactive({
   code: undefined,
 })
 const columns = ref([
-  { visible: true, align: 'center', type: '', prop: 'id', label: 'id'   },
-  { visible: true, align: 'center', type: '', prop: 'name', label: '名称'  ,showOverflowTooltip: true  },
-  { visible: true, align: 'center', type: '', prop: 'code', label: '编号'  ,showOverflowTooltip: true  },
+  { visible: true, align: 'center', type: '', prop: 'id', label: 'id' },
+  { visible: true, align: 'center', type: '', prop: 'name', label: '名称', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'code', label: '编号', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const total = ref(0)
@@ -155,7 +160,7 @@ var dictParams = [
 ]
 
 
-function getList(){
+function getList() {
   loading.value = true
   listManufacturer(queryParams).then(res => {
     const { code, data } = res
@@ -174,7 +179,7 @@ function handleQuery() {
 }
 
 // 重置查询操作
-function resetQuery(){
+function resetQuery() {
   proxy.resetForm("queryRef")
   handleQuery()
 }
@@ -218,7 +223,7 @@ const state = reactive({
 const { form, rules, options, single, multiple } = toRefs(state)
 
 // 关闭dialog
-function cancel(){
+function cancel() {
   open.value = false
   reset()
 }
@@ -239,8 +244,8 @@ function reset() {
  */
 function handlePreview(row) {
   reset()
-    const id = row.id
-    getManufacturer(id).then((res) => {
+  const id = row.id
+  getManufacturer(id).then((res) => {
     const { code, data } = res
     if (code == 200) {
       open.value = true
@@ -291,10 +296,10 @@ function submitForm() {
         })
       } else {
         addManufacturer(form.value).then((res) => {
-            proxy.$modal.msgSuccess("新增成功")
-            open.value = false
-            getList()
-          })
+          proxy.$modal.msgSuccess("新增成功")
+          open.value = false
+          getList()
+        })
       }
     }
   })
@@ -363,4 +368,12 @@ function handleExport() {
 }
 
 handleQuery()
+
+function manufacturerTongBu() {
+  proxy.$modal.loading("请稍等")
+
+  TongBu().then(result => {
+    proxy.$modal.closeLoading()
+  })
+}
 </script>

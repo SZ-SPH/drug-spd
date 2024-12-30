@@ -2,7 +2,7 @@ import request from '@/utils/request'
 import { downFile } from '@/utils/request'
 
 /**
- * 合同管理分页查询
+ * 合同分页查询
  * @param {查询条件} data
  */
 export function listSupplyContract(query) {
@@ -14,7 +14,7 @@ export function listSupplyContract(query) {
 }
 
 /**
- * 新增合同管理
+ * 新增合同
  * @param data
  */
 export function addSupplyContract(data) {
@@ -25,7 +25,7 @@ export function addSupplyContract(data) {
   })
 }
 /**
- * 修改合同管理
+ * 修改合同
  * @param data
  */
 export function updateSupplyContract(data) {
@@ -36,7 +36,7 @@ export function updateSupplyContract(data) {
   })
 }
 /**
- * 获取合同管理详情
+ * 获取合同详情
  * @param {Id}
  */
 export function getSupplyContract(id) {
@@ -47,7 +47,7 @@ export function getSupplyContract(id) {
 }
 
 /**
- * 删除合同管理
+ * 删除合同
  * @param {主键} pid
  */
 export function delSupplyContract(pid) {
@@ -56,14 +56,14 @@ export function delSupplyContract(pid) {
     method: 'delete'
   })
 }
-// 清空合同管理
+// 清空合同
 export function clearSupplyContract() {
   return request({
     url: 'business/SupplyContract/clean',
     method: 'delete'
   })
 }
-// 导出合同管理
+// 导出合同
 export async function exportSupplyContract(query) {
   await downFile('business/SupplyContract/export', { ...query })
 }

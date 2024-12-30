@@ -12,7 +12,13 @@ export function listDeliveryOrder(query) {
     params: query,
   })
 }
-
+export function Tuisong(data) {
+  return request({
+    url: 'business/DeliveryOrder/Tuisong',
+    method: 'post',
+    data: data,
+  })
+} 
 /**
  * 新增送货单
  * @param data

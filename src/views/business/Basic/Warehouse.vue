@@ -22,7 +22,12 @@
     </el-form>
     <!-- 工具区域 -->
     <el-row :gutter="15" class="mb10">
-      <el-col :span="1.5">
+      <el-col :span="1.5">u
+        <el-button type="primary" plain icon="plus" @click="warehouseTongBu">
+          同步
+        </el-button>
+      </el-col>
+      <!-- <el-col :span="1.5">
         <el-button type="primary" v-hasPermi="['warehouse:add']" plain icon="plus" @click="handleAdd">
           {{ $t('btn.add') }}
         </el-button>
@@ -57,13 +62,13 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
-        </el-dropdown>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['warehouse:export']">
-          {{ $t('btn.export') }}
-        </el-button>
-      </el-col>
+</el-dropdown>
+</el-col>
+<el-col :span="1.5">
+  <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['warehouse:export']">
+    {{ $t('btn.export') }}
+  </el-button>
+</el-col> -->
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
@@ -133,7 +138,7 @@ import {
   listWarehouse,
   addWarehouse, delWarehouse,
   updateWarehouse, getWarehouse,
-  clearWarehouse,
+  clearWarehouse, TongBu
 }
   from '@/api/business/warehouse.js'
 import importData from '@/components/ImportData'
@@ -151,7 +156,7 @@ const queryParams = reactive({
   code: undefined,
 })
 const columns = ref([
-  { visible: true, align: 'center', type: '', prop: 'id', label: 'id' },
+  { visible: false, align: 'center', type: '', prop: 'id', label: 'id' },
   { visible: true, align: 'center', type: '', prop: 'name', label: '名称', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'state', label: '状态', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'code', label: '编码', showOverflowTooltip: true },
@@ -377,4 +382,14 @@ function handleExport() {
 }
 
 handleQuery()
+
+function warehouseTongBu() {
+  proxy.$modal.loading("请稍等")
+
+  TongBu().then((res) => {
+    proxy.$modal.closeLoading()
+    proxy.$modal.msgSuccess("同步成功")
+    getList()
+  })
+}
 </script>

@@ -9,21 +9,21 @@
       <el-form-item label="病患号" prop="ipiRegistrationId">
         <el-input v-model="queryParams.ipiRegistrationId" placeholder="请输入病患号" />
       </el-form-item>
-      <el-form-item label="药品id(Hisid)" prop="drugId">
+      <!-- <el-form-item label="药品id(Hisid)" prop="drugId">
         <el-input v-model="queryParams.drugId" placeholder="请输入药品id(Hisid)" />
       </el-form-item>
       <el-form-item label="开单医生id" prop="orderedDoctorId">
         <el-input v-model="queryParams.orderedDoctorId" placeholder="请输入开单医生id" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="开单医生" prop="employeeName">
         <el-input v-model="queryParams.employeeName" placeholder="请输入开单医生" />
       </el-form-item>
       <el-form-item label="HIS医嘱号" prop="assignDrugSeq">
         <el-input v-model="queryParams.assignDrugSeq" placeholder="请输入HIS医嘱号" />
       </el-form-item>
-      <el-form-item label="开单科室id" prop="orderedDeptId">
+      <!-- <el-form-item label="开单科室id" prop="orderedDeptId">
         <el-input v-model="queryParams.orderedDeptId" placeholder="请输入开单科室id" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="开单科室名称" prop="departmentChineseName">
         <el-input v-model="queryParams.departmentChineseName" placeholder="请输入开单科室名称" />
       </el-form-item>
@@ -50,6 +50,11 @@
     <!-- 工具区域 -->
     <el-row :gutter="15" class="mb10">
       <el-col :span="1.5">
+        <el-button type="primary" plain icon="plus" @click="medicaladviceTongBu">
+          同步
+        </el-button>
+      </el-col>
+      <!-- <el-col :span="1.5">
         <el-button type="primary" v-hasPermi="['medicaladvice:add']" plain icon="plus" @click="handleAdd">
           {{ $t('btn.add') }}
         </el-button>
@@ -84,13 +89,13 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
-        </el-dropdown>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['medicaladvice:export']">
-          {{ $t('btn.export') }}
-        </el-button>
-      </el-col>
+</el-dropdown>
+</el-col>
+<el-col :span="1.5">
+  <el-button type="warning" plain icon="download" @click="handleExport" v-hasPermi="['medicaladvice:export']">
+    {{ $t('btn.export') }}
+  </el-button>
+</el-col> -->
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
@@ -239,7 +244,7 @@ import {
   listMedicalAdvice,
   addMedicalAdvice, delMedicalAdvice,
   updateMedicalAdvice, getMedicalAdvice,
-  clearMedicalAdvice,
+  clearMedicalAdvice, TongBu
 }
   from '@/api/business/medicaladvice.js'
 import importData from '@/components/ImportData'
@@ -512,4 +517,12 @@ function handleExport() {
 }
 
 handleQuery()
+
+function medicaladviceTongBu() {
+  proxy.$modal.loading("请稍等")
+
+  TongBu().then(result => { proxy.$modal.closeLoading() }
+
+  )
+}
 </script>

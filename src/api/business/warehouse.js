@@ -13,6 +13,14 @@ export function listWarehouse(query) {
   })
 }
 
+
+export function TongBu(query) {
+  return request({
+    url: 'His/HisWarehouse/TongBu',
+    method: 'get',
+    params: query,
+  })
+}
 /**
  * 新增仓库
  * @param data

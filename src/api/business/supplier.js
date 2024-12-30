@@ -20,6 +20,13 @@ export function AlllistSupplier(query) {
   })
 }
 
+export function TongBu(query) {
+  return request({
+    url: 'His/HisSupplier/TongBu',
+    method: 'get',
+    params: query,
+  })
+}
 /**
  * 新增供应商基础功能
  * @param data

@@ -57,6 +57,7 @@
 </template>
 
 <script setup>
+//添加一个表 进行 仓库用户的互相绑定 通过用户绑定的科室 显示一个下拉框选择 绑定到全局
 import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
 import Hamburger from '@/components/Hamburger'

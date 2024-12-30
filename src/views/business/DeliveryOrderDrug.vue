@@ -1,21 +1,31 @@
 <!--
  * @Descripttion: (送货单药品/DeliveryOrderDrug)
  * @Author: (admin)
- * @Date: (2024-08-27)
+ * @Date: (2024-12-03)
 -->
 <template>
   <div>
     <el-form :model="DeliveryDrugqueryParams" label-position="right" inline ref="DeliveryDrugqueryRef"
       v-show="DeliveryDrugshowSearch" @submit.prevent>
-      <el-form-item label="DeliveryId" prop="deliveryId">
-        <el-input v-model="DeliveryDrugqueryParams.deliveryId" placeholder="请输入DeliveryId" />
+      <el-form-item label="送货单" prop="deliveryId">
+        <el-input v-model.number="DeliveryDrugqueryParams.deliveryId" placeholder="请输入送货单" />
       </el-form-item>
       <el-form-item label="药品id" prop="drugId">
-        <el-input v-model="DeliveryDrugqueryParams.drugId" placeholder="请输入药品id" />
+        <el-input v-model.number="DeliveryDrugqueryParams.drugId" placeholder="请输入药品id" />
+      </el-form-item>
+      <el-form-item label="药品名称" prop="drugName">
+        <el-input v-model="DeliveryDrugqueryParams.drugName" placeholder="请输入药品名称" />
+      </el-form-item>
+      <el-form-item label="药品编号" prop="drugCode">
+        <el-input v-model="DeliveryDrugqueryParams.drugCode" placeholder="请输入药品编号" />
+      </el-form-item>
+      <el-form-item label="药品批号" prop="drugBatchNo">
+        <el-input v-model="DeliveryDrugqueryParams.drugBatchNo" placeholder="请输入药品批号" />
       </el-form-item>
       <el-form-item>
         <el-button icon="search" type="primary" @click="DeliveryDrughandleQuery">{{ $t('btn.search') }}</el-button>
-        <el-button icon="refresh" @click="DeliveryDrugresetQuery">{{ $t('btn.reset') }}</el-button>
+        <el-button icon="refresh" @click="DeliveryDrugresetQuery">{{ $t('btn.reset')
+          }}</el-button>
       </el-form-item>
     </el-form>
     <!-- 工具区域 -->
@@ -27,14 +37,14 @@
         </el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" :disabled="DeliveryDrugsingle" v-hasPermi="['deliveryorderdrug:edit']" plain
-          icon="edit" @click="DeliveryDrughandleUpdate">
+        <el-button type="success" :disabled="single" v-hasPermi="['deliveryorderdrug:edit']" plain icon="edit"
+          @click="DeliveryDrughandleUpdate">
           {{ $t('btn.edit') }}
         </el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="danger" :disabled="DeliveryDrugmultiple" v-hasPermi="['deliveryorderdrug:delete']" plain
-          icon="delete" @click="DeliveryDrughandleDelete">
+        <el-button type="danger" :disabled="multiple" v-hasPermi="['deliveryorderdrug:delete']" plain icon="delete"
+          @click="DeliveryDrughandleDelete">
           {{ $t('btn.delete') }}
         </el-button>
       </el-col>
@@ -74,14 +84,22 @@
       header-cell-class-name="el-table-header-cell" highlight-current-row @sort-change="DeliveryDrugsortChange"
       @selection-change="DeliveryDrughandleSelectionChange">
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column prop="id" label="Id" align="center" v-if="DeliveryDrugcolumns.showColumn('id')" />
-      <el-table-column prop="deliveryId" label="DeliveryId" align="center" :show-overflow-tooltip="true"
+      <el-table-column prop="id" label="Id，自增主键" align="center" v-if="DeliveryDrugcolumns.showColumn('id')" />
+      <el-table-column prop="deliveryId" label="送货单" align="center"
         v-if="DeliveryDrugcolumns.showColumn('deliveryId')" />
-      <el-table-column prop="drugId" label="药品id" align="center" :show-overflow-tooltip="true"
-        v-if="DeliveryDrugcolumns.showColumn('drugId')" />
-      <el-table-column prop="drugDetails" label="药品信息" align="center" :show-overflow-tooltip="true"
-        v-if="DeliveryDrugcolumns.showColumn('drugDetails')" />
-      <el-table-column prop="drugQuantity" label="数量" align="center" :show-overflow-tooltip="true"
+      <el-table-column prop="drugId" label="药品id" align="center" v-if="DeliveryDrugcolumns.showColumn('drugId')" />
+      <el-table-column prop="drugName" label="药品名称" align="center" :show-overflow-tooltip="true"
+        v-if="DeliveryDrugcolumns.showColumn('drugName')" />
+      <el-table-column prop="drugCode" label="药品编号" align="center" :show-overflow-tooltip="true"
+        v-if="DeliveryDrugcolumns.showColumn('drugCode')" />
+      <el-table-column prop="drugSpecification" label="药品规格" align="center" :show-overflow-tooltip="true"
+        v-if="DeliveryDrugcolumns.showColumn('drugSpecification')" />
+      <el-table-column prop="drugBatchNo" label="药品批号" align="center" :show-overflow-tooltip="true"
+        v-if="DeliveryDrugcolumns.showColumn('drugBatchNo')" />
+      <el-table-column prop="manufacturer" label="生产厂家" align="center" :show-overflow-tooltip="true"
+        v-if="DeliveryDrugcolumns.showColumn('manufacturer')" />
+      <el-table-column prop="unitPrice" label="单价" align="center" v-if="DeliveryDrugcolumns.showColumn('unitPrice')" />
+      <el-table-column prop="drugQuantity" label="药品数量" align="center"
         v-if="DeliveryDrugcolumns.showColumn('drugQuantity')" />
       <el-table-column prop="remarks" label="备注" align="center" :show-overflow-tooltip="true"
         v-if="DeliveryDrugcolumns.showColumn('remarks')" />
@@ -101,37 +119,68 @@
 
 
     <el-dialog :title="DeliveryDrugtitle" :lock-scroll="false" v-model="DeliveryDrugopen">
-      <el-form ref="DeliveryDrugformRef" :model="DeliveryDrugform" :rules="DeliveryDrugrules" label-width="100px">
+      <el-form ref="DeliveryDrugformRef" :model="DeliveryDrugform" :DeliveryDrugrules="DeliveryDrugrules"
+        label-width="100px">
         <el-row :gutter="20">
 
-          <el-col :lg="12">
-            <el-form-item label="Id" prop="id">
-              <el-input v-model.number="DeliveryDrugform.id" placeholder="请输入Id"
-                :disabled="DeliveryDrugopertype != 1" />
+          <el-col :lg="12" v-if="DeliveryDrugopertype != 1">
+            <el-form-item label="Id，自增主键" prop="id">
+              <el-input-number v-model.number="DeliveryDrugform.id" controls-position="right" placeholder="请输入Id，自增主键"
+                :disabled="true" />
             </el-form-item>
           </el-col>
 
           <el-col :lg="12">
-            <el-form-item label="DeliveryId" prop="deliveryId">
-              <el-input v-model="DeliveryDrugform.deliveryId" placeholder="请输入DeliveryId" />
+            <el-form-item label="送货单" prop="deliveryId">
+              <el-input v-model.number="DeliveryDrugform.deliveryId" placeholder="请输入送货单" />
             </el-form-item>
           </el-col>
 
           <el-col :lg="12">
             <el-form-item label="药品id" prop="drugId">
-              <el-input v-model="DeliveryDrugform.drugId" placeholder="请输入药品id" />
+              <el-input v-model.number="DeliveryDrugform.drugId" placeholder="请输入药品id" />
             </el-form-item>
           </el-col>
 
           <el-col :lg="12">
-            <el-form-item label="药品信息" prop="drugDetails">
-              <el-input v-model="DeliveryDrugform.drugDetails" placeholder="请输入药品信息" />
+            <el-form-item label="药品名称" prop="drugName">
+              <el-input v-model="DeliveryDrugform.drugName" placeholder="请输入药品名称" />
             </el-form-item>
           </el-col>
 
           <el-col :lg="12">
-            <el-form-item label="数量" prop="drugQuantity">
-              <el-input v-model="DeliveryDrugform.drugQuantity" placeholder="请输入数量" />
+            <el-form-item label="药品编号" prop="drugCode">
+              <el-input v-model="DeliveryDrugform.drugCode" placeholder="请输入药品编号" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="药品规格" prop="drugSpecification">
+              <el-input v-model="DeliveryDrugform.drugSpecification" placeholder="请输入药品规格" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="药品批号" prop="drugBatchNo">
+              <el-input v-model="DeliveryDrugform.drugBatchNo" placeholder="请输入药品批号" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="生产厂家" prop="manufacturer">
+              <el-input v-model="DeliveryDrugform.manufacturer" placeholder="请输入生产厂家" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="单价" prop="unitPrice">
+              <el-input v-model="DeliveryDrugform.unitPrice" placeholder="请输入单价" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="药品数量" prop="drugQuantity">
+              <el-input v-model.number="DeliveryDrugform.drugQuantity" placeholder="请输入药品数量" />
             </el-form-item>
           </el-col>
 
@@ -143,7 +192,7 @@
         </el-row>
       </el-form>
       <template #footer v-if="DeliveryDrugopertype != 3">
-        <el-button text @click="DeliveryDrugcancel">{{ $t('btn.cancel') }}</el-button>
+        <el-button text @click="DeliveryDrugcancel">{{ $t('btn.DeliveryDrugcancel') }}</el-button>
         <el-button type="primary" @click="DeliveryDrugsubmitForm">{{ $t('btn.submit') }}</el-button>
       </template>
     </el-dialog>
@@ -166,27 +215,35 @@ const DeliveryDrugshowSearch = ref(true)
 const DeliveryDrugqueryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  sort: '',
+  sort: 'Id',
   sortType: 'asc',
   deliveryId: undefined,
   drugId: undefined,
+  drugName: undefined,
+  drugCode: undefined,
+  drugBatchNo: undefined,
 })
 const DeliveryDrugcolumns = ref([
-  { visible: true, align: 'center', type: '', prop: 'id', label: 'Id' },
-  { visible: true, align: 'center', type: '', prop: 'deliveryId', label: 'DeliveryId', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'drugId', label: '药品id', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'drugDetails', label: '药品信息', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'drugQuantity', label: '数量', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'remarks', label: '备注', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'id', label: 'Id，自增主键' },
+  { visible: true, align: 'center', type: '', prop: 'deliveryId', label: '送货单' },
+  { visible: true, align: 'center', type: '', prop: 'drugId', label: '药品id' },
+  { visible: true, align: 'center', type: '', prop: 'drugName', label: '药品名称', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'drugCode', label: '药品编号', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'drugSpecification', label: '药品规格', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'drugBatchNo', label: '药品批号', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'manufacturer', label: '生产厂家', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'unitPrice', label: '单价' },
+  { visible: false, align: 'center', type: '', prop: 'drugQuantity', label: '药品数量' },
+  { visible: false, align: 'center', type: '', prop: 'remarks', label: '备注', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const DeliveryDrugtotal = ref(0)
 const DeliveryDrugdataList = ref([])
 const DeliveryDrugqueryRef = ref()
-const DeliveryDrugdefaultTime = ref([new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)])
+const defaultTime = ref([new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)])
 
 
-var DeliveryDrugdictParams = [
+var dictParams = [
 ]
 
 
@@ -210,14 +267,14 @@ function DeliveryDrughandleQuery() {
 
 // 重置查询操作
 function DeliveryDrugresetQuery() {
-  proxy.resetForm("DeliveryDrugqueryRef")
+  proxy.DeliveryDrugresetForm("DeliveryDrugqueryRef")
   DeliveryDrughandleQuery()
 }
 // 多选框选中数据
 function DeliveryDrughandleSelectionChange(selection) {
   DeliveryDrugids.value = selection.map((item) => item.id);
-  DeliveryDrugsingle.value = selection.length != 1
-  DeliveryDrugmultiple.value = !selection.length;
+  single.value = selection.length != 1
+  multiple.value = !selection.length;
 }
 // 自定义排序
 function DeliveryDrugsortChange(column) {
@@ -245,13 +302,12 @@ const DeliveryDrugstate = reactive({
   DeliveryDrugmultiple: true,
   DeliveryDrugform: {},
   DeliveryDrugrules: {
-    id: [{ required: true, message: "Id不能为空", trigger: "blur", type: "number" }],
   },
   DeliveryDrugoptions: {
   }
 })
 
-const { DeliveryDrugform, DeliveryDrugrules, DeliveryDrugoptions, DeliveryDrugsingle, DeliveryDrugmultiple } = toRefs(DeliveryDrugstate)
+const { DeliveryDrugform, DeliveryDrugrules, DeliveryDrugoptions, single, multiple } = toRefs(DeliveryDrugstate)
 
 // 关闭dialog
 function DeliveryDrugcancel() {
@@ -265,11 +321,16 @@ function DeliveryDrugreset() {
     id: null,
     deliveryId: null,
     drugId: null,
-    drugDetails: null,
+    drugName: null,
+    drugCode: null,
+    drugSpecification: null,
+    drugBatchNo: null,
+    manufacturer: null,
+    unitPrice: null,
     drugQuantity: null,
     remarks: null,
   };
-  proxy.resetForm("DeliveryDrugformRef")
+  proxy.DeliveryDrugresetForm("DeliveryDrugformRef")
 }
 
 /**
@@ -346,7 +407,7 @@ function DeliveryDrughandleDelete(row) {
   proxy
     .$confirm('是否确认删除参数编号为"' + Ids + '"的数据项？', "警告", {
       confirmButtonText: proxy.$t('common.ok'),
-      cancelButtonText: proxy.$t('common.cancel'),
+      DeliveryDrugcancelButtonText: proxy.$t('common.DeliveryDrugcancel'),
       type: "warning",
     })
     .then(function () {
@@ -363,7 +424,7 @@ function DeliveryDrughandleClear() {
   proxy
     .$confirm("是否确认清空所有数据项?", "警告", {
       confirmButtonText: proxy.$t('common.ok'),
-      cancelButtonText: proxy.$t('common.cancel'),
+      DeliveryDrugcancelButtonText: proxy.$t('common.DeliveryDrugcancel'),
       type: "warning",
     })
     .then(function () {
@@ -393,7 +454,7 @@ function DeliveryDrughandleExport() {
   proxy
     .$confirm("是否确认导出送货单药品数据项?", "警告", {
       confirmButtonText: "确定",
-      cancelButtonText: "取消",
+      DeliveryDrugcancelButtonText: "取消",
       type: "warning",
     })
     .then(async () => {

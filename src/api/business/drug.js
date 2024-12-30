@@ -12,7 +12,21 @@ export function listDrug(query) {
     params: query,
   })
 }
+export function gyslistDrug(query) {
+  return request({
+    url: 'business/Drug/GYSlist',
+    method: 'get',
+    params: query,
+  })
+}
 
+export function Tongbu(query) {
+  return request({
+    url: 'His/HisDrug/Tongbu',
+    method: 'get',
+    params: query,
+  })
+}
 /**
  * 新增药品基础信息
  * @param data

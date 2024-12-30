@@ -5,8 +5,8 @@
 -->
 <template>
   <div>
-    <el-form :model="SupplierqueryParams" label-position="right" inline ref="queryRef" v-show="SuppliershowSearch"
-      @submit.prevent>
+    <el-form :model="SupplierqueryParams" label-position="right" inline ref="SupplierqueryRef"
+      v-show="SuppliershowSearch" @submit.prevent>
       <el-form-item label="id" prop="id">
         <el-input v-model.number="SupplierqueryParams.id" placeholder="请输入id" />
       </el-form-item>
@@ -30,47 +30,52 @@
     <!-- 工具区域 -->
     <el-row :gutter="15" class="mb10">
       <el-col :span="1.5">
-        <el-button type="primary" v-hasPermi="['supplier:add']" plain icon="plus" @click="SupplierhandleAdd">
-          {{ $t('btn.add') }}
+        <el-button type="primary" plain icon="plus" @click="SupplierTongBu">
+          同步
         </el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button type="success" :disabled="Suppliersingle" v-hasPermi="['supplier:edit']" plain icon="edit"
-          @click="SupplierhandleUpdate">
-          {{ $t('btn.edit') }}
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" :disabled="Suppliermultiple" v-hasPermi="['supplier:delete']" plain icon="delete"
-          @click="SupplierhandleDelete">
-          {{ $t('btn.delete') }}
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" v-hasPermi="['supplier:delete']" plain icon="delete" @click="SupplierhandleClear">
-          {{ $t('btn.clean') }}
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-dropdown trigger="click" v-hasPermi="['supplier:import']">
-          <el-button type="primary" plain icon="Upload">
-            {{ $t('btn.import') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      <!-- <el-col :span="1.5">
+          <el-button type="primary" v-hasPermi="['supplier:add']" plain icon="plus" @click="SupplierhandleAdd">
+            {{ $t('btn.add') }}
           </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="upload">
-                <importData templateUrl="business/Supplier/importTemplate" importUrl="/business/Supplier/importData"
-                  @success="SupplierhandleFileSuccess"></importData>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="download" @click="SupplierhandleExport" v-hasPermi="['supplier:export']">
-          {{ $t('btn.export') }}
-        </el-button>
-      </el-col>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="success" :disabled="Suppliersingle" v-hasPermi="['supplier:edit']" plain icon="edit"
+            @click="SupplierhandleUpdate">
+            {{ $t('btn.edit') }}
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="danger" :disabled="Suppliermultiple" v-hasPermi="['supplier:delete']" plain icon="delete"
+            @click="SupplierhandleDelete">
+            {{ $t('btn.delete') }}
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="danger" v-hasPermi="['supplier:delete']" plain icon="delete" @click="SupplierhandleClear">
+            {{ $t('btn.clean') }}
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-dropdown trigger="click" v-hasPermi="['supplier:import']">
+            <el-button type="primary" plain icon="Upload">
+              {{ $t('btn.import') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="upload">
+                  <importData templateUrl="business/Supplier/importTemplate" importUrl="/business/Supplier/importData"
+                    @success="SupplierhandleFileSuccess"></importData>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+</el-dropdown>
+</el-col>
+<el-col :span="1.5">
+  <el-button type="warning" plain icon="download" @click="SupplierhandleExport" v-hasPermi="['supplier:export']">
+    {{ $t('btn.export') }}
+  </el-button>
+</el-col> -->
       <right-toolbar v-model:showSearch="SuppliershowSearch" @queryTable="SuppliergetList"
         :columns="Suppliercolumns"></right-toolbar>
     </el-row>
@@ -151,7 +156,7 @@ import {
   listSupplier,
   addSupplier, delSupplier,
   updateSupplier, getSupplier,
-  clearSupplier,
+  clearSupplier, TongBu
 }
   from '@/api/business/supplier.js'
 import importData from '@/components/ImportData'
@@ -171,7 +176,7 @@ const SupplierqueryParams = reactive({
   enterprisePhone: undefined,
 })
 const Suppliercolumns = ref([
-  { visible: true, align: 'center', type: '', prop: 'id', label: 'id' },
+  { visible: false, align: 'center', type: '', prop: 'id', label: 'id' },
   { visible: true, align: 'center', type: '', prop: 'supplierName', label: '供应商名称', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'socialCreditCode', label: '社会信用代码', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'enterpriseAddress', label: '企业地址', showOverflowTooltip: true },
@@ -180,7 +185,7 @@ const Suppliercolumns = ref([
 ])
 const Suppliertotal = ref(0)
 const SupplierdataList = ref([])
-const SupplierqueryRef = ref()
+const SupplierSupplierqueryRef = ref()
 const SupplierdefaultTime = ref([new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)])
 
 
@@ -208,7 +213,7 @@ function SupplierhandleQuery() {
 
 // 重置查询操作
 function SupplierresetQuery() {
-  proxy.resetForm("SupplierqueryRef")
+  proxy.resetForm("SupplierSupplierqueryRef")
   SupplierhandleQuery()
 }
 // 多选框选中数据
@@ -399,4 +404,10 @@ function SupplierhandleExport() {
 }
 
 SupplierhandleQuery()
+
+function SupplierTongBu() {
+  proxy.$modal.loading("请稍等")
+
+  TongBu().then(result => { proxy.$modal.closeLoading() })
+}
 </script>

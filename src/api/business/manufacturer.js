@@ -13,6 +13,13 @@ export function listManufacturer(query) {
   })
 }
 
+export function TongBu(query) {
+  return request({
+    url: 'His/HisManufacturer/TongBu',
+    method: 'get',
+    params: query,
+  })
+}
 /**
  * 新增生产厂家
  * @param data
