@@ -59,11 +59,35 @@
           </el-button>
         </el-col>
         <el-col :span="1.5">
-          <el-button type="danger" :disabled="DeliveryOrderids == null" v-hasPermi="['deliveryorder:add']" plain
-            icon="success" @click="tuisong">
+          <el-button type="warning" :disabled="DeliveryOrderids == null" v-hasPermi="['deliveryorder:add']" plain
+            icon="Promotion" @click="tuisong">
             推送
           </el-button>
         </el-col>
+
+        <el-col :span="1.5">
+          <el-dropdown trigger="click" v-hasPermi="['gyscodedetails:import']">
+            <el-button type="primary" plain icon="Upload">
+              {{ $t('btn.import') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="upload">
+                  <importData templateUrl="business/GYSCodeDetails/importTemplate"
+                    importUrl="/business/GYSCodeDetails/importData" @success="GYSCodehandleFileSuccess">
+                  </importData>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="warning" plain icon="download" @click="GYSCodehandleExport"
+            v-hasPermi="['gyscodedetails:export']">
+            下载导入模板
+          </el-button>
+        </el-col>
+
         <!-- <el-col :span="1.5">
           <el-dropdown trigger="click" v-hasPermi="['deliveryorder:import']">
             <el-button type="primary" plain icon="Upload">
@@ -106,12 +130,7 @@
           v-if="DeliveryOrdercolumns.showColumn('deliveryDetails')" />
         <el-table-column prop="remarks" label="备注" align="center" :show-overflow-tooltip="true"
           v-if="DeliveryOrdercolumns.showColumn('remarks')" />
-        <el-table-column prop="DeliveryOrderstates" label="状态" align="center"
-          v-if="DeliveryOrdercolumns.showColumn('DeliveryOrderstates')">
-          <template #default="scope">
-            <dict-tag :options="DeliveryOrderoptions.DeliveryOrderstatesOptions"
-              :value="scope.row.DeliveryOrderstates" />
-          </template>
+        <el-table-column prop="states" label="状态" align="center" v-if="DeliveryOrdercolumns.showColumn('states')">
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" :show-overflow-tooltip="true"
           v-if="DeliveryOrdercolumns.showColumn('createTime')" />
@@ -123,10 +142,12 @@
           <template #default="scope">
             <el-button type="primary" size="small" icon="view" DeliveryOrdertitle="详情"
               @click="DeliveryOrderhandlePreview(scope.row)"></el-button>
-            <el-button type="success" size="small" icon="edit" DeliveryOrdertitle="编辑"
-              v-hasPermi="['deliveryorder:edit']" @click="DeliveryOrderhandleUpdate(scope.row)"></el-button>
-            <el-button type="danger" size="small" icon="delete" DeliveryOrdertitle="删除"
-              v-hasPermi="['deliveryorder:delete']" @click="DeliveryOrderhandleDelete(scope.row)"></el-button>
+            <el-button :disabled="scope.row.states == '已推送'" type="success" size="small" icon="edit"
+              DeliveryOrdertitle="编辑" v-hasPermi="['deliveryorder:edit']"
+              @click="DeliveryOrderhandleUpdate(scope.row)"></el-button>
+            <el-button :disabled="scope.row.states == '已推送'" type="danger" size="small" icon="delete"
+              DeliveryOrdertitle="删除" v-hasPermi="['deliveryorder:delete']"
+              @click="DeliveryOrderhandleDelete(scope.row)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -175,7 +196,7 @@
             </el-col>
             <el-col :lg="12">
               <el-form-item label="创建人" prop="remarks">
-                <el-input v-model="DeliveryOrderform.createdBy" placeholder="请输入创建人" />
+                <el-input :disabled="true" v-model="DeliveryOrderform.createdBy" placeholder="请输入创建人" />
               </el-form-item>
             </el-col>
             <el-col :lg="12">
@@ -269,6 +290,7 @@
                 {{ $t('btn.delete') }}
               </el-button>
             </el-col>
+
             <!-- <el-col :span="1.5">
               <el-button type="danger" v-hasPermi="['deliveryorderdrug:delete']" plain icon="delete"
                 @click="DeliveryDrughandleClear">
@@ -302,6 +324,30 @@
                 添加明细
               </el-button>
             </el-col>
+
+            <!-- <el-col :span="1.5">
+              <el-dropdown trigger="click" v-hasPermi="['gyscodedetails:import']">
+                <el-button type="primary" plain icon="Upload">
+                  {{ $t('btn.import') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="upload">
+                      <importData templateUrl="business/GYSCodeDetails/importTemplate"
+                        importUrl="/business/GYSCodeDetails/importData" @success="GYSCodehandleFileSuccess">
+                      </importData>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button type="warning" plain icon="download" @click="GYSCodehandleExport"
+                v-hasPermi="['gyscodedetails:export']">
+                下载导入模板
+              </el-button>
+            </el-col> -->
+
             <right-toolbar v-model:showSearch="DeliveryDrugshowSearch" @queryTable="DeliveryDruggetList"
               :columns="DeliveryDrugcolumns"></right-toolbar>
           </el-row>
@@ -329,30 +375,38 @@
               v-if="DeliveryDrugcolumns.showColumn('unitPrice')" /> -->
             <el-table-column prop="unitPrice" label="价格" align="center" :show-overflow-tooltip="true"
               v-if="Drugcolumns.showColumn('unitPrice')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input v-model="row.unitPrice" size="small" @blur="DrugQuantityChange(row)" class="inputs" />
-              </template>
+              </template> -->
             </el-table-column>
+            <el-table-column prop="count" label="药品小码数量" align="center" v-if="DeliveryDrugcolumns.showColumn('count')">
+
+            </el-table-column>
+
             <el-table-column prop="drugQuantity" label="药品数量" align="center"
               v-if="DeliveryDrugcolumns.showColumn('drugQuantity')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input v-model="row.drugQuantity" size="small" @blur="DrugQuantityChange(row)" class="inputs" />
-              </template>
+              </template> -->
             </el-table-column>
             <el-table-column prop="minunit" label="最小单位" align="center" :show-overflow-tooltip="true"
               v-if="DeliveryDrugcolumns.showColumn('minunit')" />
+            <el-table-column prop="mixqty" label="药品最小单位数量" align="center"
+              v-if="DeliveryDrugcolumns.showColumn('mixqty')">
+
+            </el-table-column>
             <el-table-column prop="packageRatio" label="转换系数" align="center"
               v-if="DeliveryDrugcolumns.showColumn('packageRatio')" />
             <el-table-column prop="packageUnit" label="包装单位" align="center" :show-overflow-tooltip="true"
               v-if="DeliveryDrugcolumns.showColumn('packageUnit')" />
             <el-table-column prop="remarks" label="备注" align="center" :show-overflow-tooltip="true"
               v-if="DeliveryDrugcolumns.showColumn('remarks')" />
-            <el-table-column prop="remarks" label="生产日期" align="center" :show-overflow-tooltip="true"
+            <el-table-column prop="exprie" label="生产日期" align="center" :show-overflow-tooltip="true"
               v-if="DeliveryDrugcolumns.showColumn('exprie')" />
-            <el-table-column prop="remarks" label="有效期" align="center" :show-overflow-tooltip="true"
+            <el-table-column prop="dateOfManufacture" label="有效期" align="center" :show-overflow-tooltip="true"
               v-if="DeliveryDrugcolumns.showColumn('dateOfManufacture')" />
 
-            <el-table-column label="操作" width="160">
+            <el-table-column fixed="right" label="操作" width="160">
               <template #default="scope">
                 <!-- <el-button type="primary" size="small" icon="view" title="详情"
                   @click="DeliveryDrughandlePreview(scope.row)"></el-button> -->
@@ -375,21 +429,21 @@
             <el-form ref="DeliveryDrugformRef" :model="DeliveryDrugform" :DeliveryDrugrules="DeliveryDrugrules"
               label-width="100px">
               <el-row :gutter="20">
-
-                <!-- <el-col :lg="12" v-if="DeliveryDrugopertype != 1">
+                <!-- 
+                <el-col :lg="12" v-if="DeliveryDrugopertype != 1">
                   <el-form-item label="Id，自增主键" prop="id">
                     <el-input-number v-model.number="DeliveryDrugform.id" controls-position="right"
                       placeholder="请输入Id，自增主键" :disabled="true" />
                   </el-form-item>
-                </el-col> -->
+                </el-col>
 
-                <!-- <el-col :lg="12">
+                <el-col :lg="12">
                   <el-form-item label="送货单" prop="deliveryId">
                     <el-input v-model.number="DeliveryDrugform.deliveryId" placeholder="请输入送货单" />
                   </el-form-item>
-                </el-col> -->
+                </el-col>
 
-                <!-- <el-col :lg="12">
+                <el-col :lg="12">
                   <el-form-item label="药品id" prop="drugId">
                     <el-input v-model.number="DeliveryDrugform.drugId" placeholder="请输入药品id" />
                   </el-form-item>
@@ -397,19 +451,46 @@
 
                 <el-col :lg="12">
                   <el-form-item label="药品名称" prop="drugName">
-                    <el-input v-model="DeliveryDrugform.drugName" placeholder="请输入药品名称" />
+                    <el-input :disabled="true" v-model="DeliveryDrugform.drugName" placeholder="请输入药品名称" />
                   </el-form-item>
                 </el-col>
 
                 <el-col :lg="12">
                   <el-form-item label="药品编号" prop="drugCode">
-                    <el-input v-model="DeliveryDrugform.drugCode" placeholder="请输入药品编号" />
+                    <el-input :disabled="true" v-model="DeliveryDrugform.drugCode" placeholder="请输入药品编号" />
+                  </el-form-item>
+                </el-col>
+
+                <el-col v-if="false" :lg="12">
+                  <el-form-item label="药品规格" prop="drugSpecification">
+                    <el-input v-model="DeliveryDrugform.drugSpecification" placeholder="请输入药品规格" />
+                  </el-form-item>
+                </el-col>
+                <el-col :lg="12">
+                  <el-form-item label="最小单位" prop="minunit">
+                    <el-input :disabled="true" v-model="DeliveryDrugform.minunit" placeholder="请输入最小单位" />
                   </el-form-item>
                 </el-col>
 
                 <el-col :lg="12">
-                  <el-form-item label="药品规格" prop="drugSpecification">
-                    <el-input v-model="DeliveryDrugform.drugSpecification" placeholder="请输入药品规格" />
+                  <el-form-item label="包装单位" prop="packageUnit">
+                    <el-input :disabled="true" v-model="DeliveryDrugform.packageUnit" placeholder="请输入包装单位" />
+                  </el-form-item>
+                </el-col>
+                <el-col :lg="12">
+                  <el-form-item label="转换系数" prop="packageRatio">
+                    <el-input :disabled="true" v-model.number="DeliveryDrugform.packageRatio" placeholder="请输入转换系数" />
+                  </el-form-item>
+                </el-col>
+                <el-col :lg="12">
+                  <el-form-item label="药品数量" prop="drugQuantity">
+                    <el-input v-model.number="DeliveryDrugform.drugQuantity" placeholder="请输入药品数量" />
+                  </el-form-item>
+                </el-col>
+
+                <el-col :lg="12">
+                  <el-form-item label="最小单位数量" prop="mixqty">
+                    <el-input v-model.number="DeliveryDrugform.mixqty" placeholder="请输入药品最小单位数量" />
                   </el-form-item>
                 </el-col>
 
@@ -418,7 +499,15 @@
                     <el-input v-model="DeliveryDrugform.drugBatchNo" placeholder="请输入药品批号" />
                   </el-form-item>
                 </el-col>
-
+                <el-col :lg="12">
+                  <el-form-item label="生产日期" prop="dateOfManufacture">
+                    <el-input v-model="DeliveryDrugform.dateOfManufacture" placeholder="请输入生产日期" />
+                  </el-form-item>
+                </el-col> <el-col :lg="12">
+                  <el-form-item label="有效期" prop="exprie">
+                    <el-input v-model="DeliveryDrugform.exprie" placeholder="请输入有效期" />
+                  </el-form-item>
+                </el-col>
                 <el-col :lg="12">
                   <el-form-item label="生产厂家" prop="manufacturer">
                     <el-input v-model="DeliveryDrugform.manufacturer" placeholder="请输入生产厂家" />
@@ -431,13 +520,8 @@
                   </el-form-item>
                 </el-col>
 
-                <el-col :lg="12">
-                  <el-form-item label="药品数量" prop="drugQuantity">
-                    <el-input v-model.number="DeliveryDrugform.drugQuantity" placeholder="请输入药品数量" />
-                  </el-form-item>
-                </el-col>
 
-                <el-col :lg="12">
+                <el-col v-if="false" :lg="12">
                   <el-form-item label="备注" prop="remarks">
                     <el-input v-model="DeliveryDrugform.remarks" placeholder="请输入备注" />
                   </el-form-item>
@@ -486,17 +570,17 @@
           </el-form>
           <!-- 工具区域 -->
           <el-row :gutter="15" class="mb10">
-            <el-col :span="1.5">
+            <!-- <el-col :span="1.5">
               <el-button type="primary" v-hasPermi="['gyscodedetails:add']" plain icon="plus" @click="GYSCodehandleAdd">
                 {{ $t('btn.add') }}
               </el-button>
-            </el-col>
-            <el-col :span="1.5">
+            </el-col> -->
+            <!-- <el-col :span="1.5">
               <el-button type="success" :disabled="GYSCodesingle" v-hasPermi="['gyscodedetails:edit']" plain icon="edit"
                 @click="GYSCodehandleUpdate">
                 {{ $t('btn.edit') }}
               </el-button>
-            </el-col>
+            </el-col> -->
             <el-col :span="1.5">
               <el-button type="danger" :disabled="GYSCodemultiple" v-hasPermi="['gyscodedetails:delete']" plain
                 icon="delete" @click="GYSCodehandleDelete">
@@ -509,28 +593,7 @@
                 {{ $t('btn.clean') }}
               </el-button>
             </el-col>
-            <el-col :span="1.5">
-              <el-dropdown trigger="click" v-hasPermi="['gyscodedetails:import']">
-                <el-button type="primary" plain icon="Upload">
-                  {{ $t('btn.import') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="upload">
-                      <importData templateUrl="business/GYSCodeDetails/importTemplate"
-                        importUrl="/business/GYSCodeDetails/importData" @success="GYSCodehandleFileSuccess">
-                      </importData>
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-col>
-            <el-col :span="1.5">
-              <el-button type="warning" plain icon="download" @click="GYSCodehandleExport"
-                v-hasPermi="['gyscodedetails:export']">
-                {{ $t('btn.export') }}
-              </el-button>
-            </el-col>
+
             <right-toolbar v-model:showSearch="GYSCodeshowSearch" @queryTable="GYSCodegetList"
               :columns="GYSCodecolumns"></right-toolbar>
           </el-row>
@@ -589,8 +652,8 @@
               <template #default="scope">
                 <el-button type="primary" size="small" icon="view" title="详情"
                   @click="GYSCodehandlePreview(scope.row)"></el-button>
-                <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['gyscodedetails:edit']"
-                  @click="GYSCodehandleUpdate(scope.row)"></el-button>
+                <!-- <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['gyscodedetails:edit']"
+                  @click="GYSCodehandleUpdate(scope.row)"></el-button> -->
                 <el-button type="danger" size="small" icon="delete" title="删除" v-hasPermi="['gyscodedetails:delete']"
                   @click="GYSCodehandleDelete(scope.row)"></el-button>
               </template>
@@ -1027,7 +1090,7 @@ const DeliveryOrdercolumns = ref([
   { visible: true, align: 'center', type: '', prop: 'invoiceNo', label: '发票号', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'deliveryDetails', label: '单据详情', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'remarks', label: '备注', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: 'dict', prop: 'DeliveryOrderstates', label: '状态', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: 'dict', prop: 'states', label: '状态', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'createTime', label: '创建时间', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'pushTime', label: '推送时间', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'createdBy', label: '创建人', showOverflowTooltip: true },
@@ -1063,8 +1126,10 @@ function DeliveryOrdergetList() {
   proxy.addDateRange(DeliveryOrderqueryParams, DeliveryOrderdateRangeCreateTime.value, 'CreateTime');
   proxy.addDateRange(DeliveryOrderqueryParams, DeliveryOrderdateRangePushTime.value, 'PushTime');
   DeliveryOrderloading.value = true
+
   listDeliveryOrder(DeliveryOrderqueryParams).then(res => {
     const { code, data } = res
+    console.log(data)
     if (code == 200) {
       DeliveryOrderdataList.value = data.result
       DeliveryOrdertotal.value = data.totalNum
@@ -1327,6 +1392,9 @@ const DeliveryDrugcolumns = ref([
   { visible: true, align: 'center', type: '', prop: 'packageRatio', label: '转换系数' },
   { visible: true, align: 'center', type: '', prop: 'packageUnit', label: '包装单位', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'remarks', label: '备注', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'mixqty', label: '药品最小单位数量', showOverflowTooltip: true },
+
+
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const DeliveryDrugtotal = ref(0)
@@ -1421,6 +1489,9 @@ function DeliveryDrugreset() {
     unitPrice: null,
     drugQuantity: null,
     remarks: null,
+    exprie: null,
+    dateOfManufacture: null,
+    mixqty: null,
   };
   proxy.resetForm("DeliveryDrugformRef")
 }
@@ -1586,9 +1657,9 @@ const GYSCodecolumns = ref([
   { visible: false, align: 'center', type: '', prop: 'deliveryid', label: '送货单id' },
   { visible: false, align: 'center', type: '', prop: 'drugId', label: '药品id' },
   { visible: true, align: 'center', type: '', prop: 'code', label: '追溯码', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'physicTypeDesc', label: '药品类型描述', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'refEntId', label: '企业id', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'entName', label: '企业名称', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'physicTypeDesc', label: '药品类型描述', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'refEntId', label: '企业id', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'entName', label: '企业名称', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'packageLevel', label: '码等级', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'physicName', label: '药品名称', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'exprie', label: '有效期', showOverflowTooltip: true },
@@ -1834,6 +1905,7 @@ const GYSCodehandleFileSuccess = (response) => {
 
 // 导出按钮操作
 function GYSCodehandleExport() {
+  console.log(DeliveryOrderids.value)
   proxy
     .$confirm("是否确认导出送货单追溯码数据项?", "警告", {
       confirmButtonText: "确定",
@@ -1841,7 +1913,13 @@ function GYSCodehandleExport() {
       type: "warning",
     })
     .then(async () => {
-      await proxy.downFile('/business/GYSCodeDetails/export', { ...GYSCodequeryParams })
+      const params = DeliveryOrderids.value.map(id => `parm=${id}`).join('&');
+      const url = `/business/DeliveryOrder/DemoExport?${params}`;
+
+
+
+      await proxy.downFile(url);
+      // await proxy.downFile('/business/DeliveryOrder/DemoExport', { parm: DeliveryOrderids.value })
     })
 }
 
@@ -1973,6 +2051,9 @@ function DrughandleSelectionChange(selection) {
       Minunit: item.minunit,
       PackageRatio: item.packageRatio,
       PackageUnit: item.packageUnit,
+      Exprie: item.exprie,
+      DateOfManufacture: item.dateOfManufacture,
+
     };
   });
 }
@@ -2362,4 +2443,15 @@ function tuisong() {
 
   })
 }
+
+
+const resMIXqty = ref(0)
+
+watch(() => DeliveryDrugstate.DeliveryDrugform.drugQuantity, (newVal) => {
+  // 1 比 10 的计算规则
+  console.log(newVal * DeliveryDrugstate.DeliveryDrugform.packageRatio)
+  DeliveryDrugstate.DeliveryDrugform.mixqty = newVal * DeliveryDrugstate.DeliveryDrugform.packageRatio;
+  // state.form.mixqty = resMIXqty
+});
+
 </script>

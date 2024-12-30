@@ -66,6 +66,8 @@
           v-if="Receiptcolumns.showColumn('mark')" />
         <el-table-column prop="hisBuyCode" label="His采购单号" align="center" :show-overflow-tooltip="true"
           v-if="Receiptcolumns.showColumn('hisBuyCode')" />
+        <el-table-column prop="decode" label="供应商送货单" align="center" :show-overflow-tooltip="true"
+          v-if="Receiptcolumns.showColumn('decode')" />
 
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="scope">
@@ -116,19 +118,26 @@
             </el-table-column>
             <el-table-column prop="inventoryQuantity" label="药品入库数量" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('inventoryQuantity')">
-              <template #default="{ row }" class="bnn">
+              <!-- <template #default="{ row }" class="bnn">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.inventoryQuantity" size="small" class="inputs"
                   :style="{ color: 'red' }" @blur="DrugQuantityChange(row)" />
-              </template>
+              </template> -->
+            </el-table-column>
+            <el-table-column prop="mixqty" label="最小单位入库数量" align="center" :show-overflow-tooltip="true"
+              v-if="columns.showColumn('mixqty')">
+              <!-- <template #default="{ row }" class="bnn">
+                <el-input :disabled="Rstate.value == '已推送'" v-model="row.inventoryQuantity" size="small" class="inputs"
+                  :style="{ color: 'red' }" @blur="DrugQuantityChange(row)" />
+              </template> -->
             </el-table-column>
             <el-table-column prop="tracingSourceCode" label="药品溯源码" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('tracingSourceCode')" />
             <el-table-column prop="batchNumber" label="药品批号" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('batchNumber')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.batchNumber" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
-              </template>
+              </template> -->
               <!-- @blur="DrugQuantityChange(row)" -->
             </el-table-column>
             <el-table-column prop="drugSpecifications" label="药品规格" align="center" :show-overflow-tooltip="true"
@@ -138,32 +147,32 @@
               v-if="columns.showColumn('manufacturerId')" />
             <el-table-column prop="exprie" label="有效期至" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('exprie')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.exprie" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
-              </template>
+              </template> -->
             </el-table-column>
             <el-table-column prop="price" label="价格" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('price')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input v-model="row.price" size="small" @blur="DrugQuantityChange(row)" class="inputs" />
-              </template>
+              </template> -->
               <!-- @blur="DrugQuantityChange(row)" -->
             </el-table-column>
             <el-table-column prop="locationNumber" label="货位号" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('locationNumber')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.locationNumber" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
-              </template>
+              </template> -->
 
             </el-table-column>
             <el-table-column prop="dateOfManufacture" label="生产日期" align="center" :show-overflow-tooltip="true"
               v-if="columns.showColumn('dateOfManufacture')">
-              <template #default="{ row }">
+              <!-- <template #default="{ row }">
                 <el-input :disabled="Rstate.value == '已推送'" v-model="row.dateOfManufacture" size="small" class="inputs"
                   @blur="DrugQuantityChange(row)" />
-              </template>
+              </template> -->
 
             </el-table-column>
             <el-table-column prop="minunit" label="最小单位" align="center" :show-overflow-tooltip="true"
@@ -180,8 +189,8 @@
                   v-hasPermi="['inwarehousing:edit']" @click="handleUpdate(scope.row)"></el-button>
                 <el-button :disabled="Rstate.value == '已推送'" type="success" size="small" icon="FullScreen" title="扫码添加"
                   v-hasPermi="['inwarehousing:add']" @click="CodeScreenAdd(scope.row)"></el-button>
-                <el-button :disabled="Rstate.value == '已推送'" type="primary" size="small" icon="edit" title="手动添加"
-                  v-hasPermi="['inwarehousing:add']" @click="CodehandleAdd(scope.row)"></el-button>
+                <!-- <el-button :disabled="Rstate.value == '已推送'" type="primary" size="small" icon="edit" title="手动添加"
+                  v-hasPermi="['inwarehousing:add']" @click="CodehandleAdd(scope.row)"></el-button> -->
                 <el-button type="danger" size="small" icon="delete" title="删除" v-hasPermi="['inwarehousing:delete']"
                   @click="handleDelete(scope.row)"></el-button>
               </template>
@@ -262,8 +271,8 @@
               <template #default="scope">
                 <el-button type="primary" size="small" icon="view" title="详情"
                   @click="CodehandlePreview(scope.row)"></el-button>
-                <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['codedetails:edit']"
-                  @click="CodehandleUpdate(scope.row)"></el-button>
+                <!-- <el-button type="success" size="small" icon="edit" title="编辑" v-hasPermi="['codedetails:edit']"
+                  @click="CodehandleUpdate(scope.row)"></el-button> -->
                 <el-button type="danger" size="small" icon="delete" title="删除" v-hasPermi="['codedetails:delete']"
                   @click="CodehandleDelete(scope.row)"></el-button>
               </template>
@@ -725,6 +734,122 @@
       </template>
 
     </el-dialog>
+
+    <el-dialog :title="title" :lock-scroll="false" v-model="open">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+        <el-row :gutter="20">
+          <el-col :lg="12" v-if="false">
+            <el-form-item label="id" prop="id">
+              <el-input-number v-model.number="form.id" controls-position="right" placeholder="请输入id"
+                :disabled="true" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12" v-if="false">
+            <el-form-item label="药品id" prop="drugId">
+              <el-input v-model.number="form.drugId" placeholder="请输入药品id" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="药品编码" prop="drugCode">
+              <el-input :disabled="true" v-model="form.drugCode" placeholder="请输入药品编码" />
+            </el-form-item>
+          </el-col>
+
+          <el-col v-if="false" :lg="12">
+            <el-form-item label="药品溯源码" prop="tracingSourceCode">
+              <el-input v-model="form.tracingSourceCode" placeholder="请输入药品溯源码" />
+            </el-form-item>
+          </el-col>
+
+
+          <el-col :lg="12">
+            <el-form-item label="药品入库数量" prop="inventoryQuantity">
+              <el-input v-model.number="form.inventoryQuantity" placeholder="请输入药品入库数量" />
+            </el-form-item>
+          </el-col>
+
+          <el-col v-if="false" :lg="12">
+            <el-form-item label="药品规格" prop="drugSpecifications">
+              <el-input v-model="form.drugSpecifications" placeholder="请输入药品规格" />
+            </el-form-item>
+          </el-col>
+          <!-- <el-col v-if="false" :lg="12">
+            <el-form-item label="药品规格" prop="drugSpecifications">
+              <el-input v-model="form.drugSpecifications" placeholder="请输入药品规格" />
+            </el-form-item>
+          </el-col> -->
+          <el-col :lg="12">
+            <el-form-item label="包装单位" prop="packageUnit">
+              <el-input :disabled="true" v-model="form.packageUnit" placeholder="请输入包装单位" />
+            </el-form-item>
+          </el-col>
+          <el-col :lg="12">
+            <el-form-item label="转换系数" prop="packageRatio">
+              <el-input :disabled="true" v-model.number="form.packageRatio" placeholder="请输入转换系数" />
+            </el-form-item>
+          </el-col>
+          <el-col :lg="12">
+            <el-form-item label="最小单位" prop="minunit">
+              <el-input :disabled="true" v-model="form.minunit" placeholder="请输入最小单位" />
+            </el-form-item>
+          </el-col>
+          <el-col :lg="12">
+            <el-form-item label="最小单位数量" prop="mixqty">
+              <el-input v-model.number="form.mixqty" placeholder="最小单位数量" />
+            </el-form-item>
+          </el-col>
+
+          <el-col v-if="false" :lg="12">
+            <el-form-item label="入库单据id" prop="receiptId">
+              <el-input v-model.number="form.receiptId" placeholder="请输入入库单据id" />
+            </el-form-item>
+          </el-col>
+          <el-col :lg="12">
+            <el-form-item label="药品批号" prop="batchNumber">
+              <el-input v-model="form.batchNumber" placeholder="请输入药品批号" />
+            </el-form-item>
+          </el-col>
+
+          <el-col v-if="false" :lg="12">
+            <el-form-item label="生产厂家" prop="manufacturerId">
+              <el-input v-model.number="form.manufacturerId" placeholder="请输入生产厂家" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="有效期" prop="exprie">
+              <el-input v-model="form.exprie" placeholder="请输入有效期" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="价格" prop="price">
+              <el-input v-model="form.price" placeholder="请输入价格" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12" v-if="false">
+            <el-form-item label="货位号" prop="locationNumber">
+              <el-input v-model="form.locationNumber" placeholder="请输入货位号" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :lg="12">
+            <el-form-item label="生产日期" prop="dateOfManufacture">
+              <el-input v-model="form.dateOfManufacture" placeholder="请输入生产日期" />
+            </el-form-item>
+          </el-col>
+
+
+        </el-row>
+      </el-form>
+      <template #footer v-if="opertype != 3">
+        <el-button text @click="cancel">{{ $t('btn.cancel') }}</el-button>
+        <el-button type="primary" @click="submitForm">{{ $t('btn.submit') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 
 </template>
@@ -737,6 +862,7 @@ import {
   AllMixCode
 }
   from '@/api/business/inwarehousing.js'
+
 const { proxy } = getCurrentInstance()
 const ids = ref([])
 const loading = ref(false)
@@ -798,6 +924,7 @@ function getList() {
   listInWarehousing(queryParams).then(res => {
     const { code, data } = res
     if (code == 200) {
+      console.log(res)
       dataList.value = data.result
       total.value = data.totalNum
       loading.value = false
@@ -842,6 +969,7 @@ const oDrugopen = ref(false)
 // 操作类型 1、add 2、edit 3、view
 const opertype = ref(0)
 const open = ref(false)
+
 const state = reactive({
   single: true,
   multiple: true,
@@ -854,13 +982,43 @@ const state = reactive({
 })
 
 const { form, rules, options, single, multiple } = toRefs(state)
+const resMIXqty = ref(0)
+
+watch(() => state.form.inventoryQuantity, (newVal) => {
+  // 1 比 10 的计算规则
+  state.form.mixqty = newVal * state.form.packageRatio;
+  // state.form.mixqty = resMIXqty
+});
 
 // 关闭dialog
 function oDrugcancel() {
   oDrugopen.value = false
   reset()
 }
-
+function cancel() {
+  open.value = false
+  reset()
+}
+// 添加&修改 表单提交
+function submitForm() {
+  proxy.$refs["formRef"].validate((valid) => {
+    if (valid) {
+      if (form.value.id != undefined && opertype.value === 2) {
+        updateInWarehousing(form.value).then((res) => {
+          proxy.$modal.msgSuccess("修改成功")
+          open.value = false
+          getList()
+        })
+      } else {
+        addInWarehousing(form.value).then((res) => {
+          proxy.$modal.msgSuccess("新增成功")
+          open.value = false
+          getList()
+        })
+      }
+    }
+  })
+}
 // 重置表单
 function reset() {
   form.value = {
@@ -877,7 +1035,7 @@ function reset() {
     price: null,
     locationNumber: null,
     dateOfManufacture: null,
-    minunit: null,
+    minunit: null, mixqty: null,
   }
   proxy.resetForm("formRef")
 }
@@ -925,6 +1083,7 @@ function handleUpdate(row) {
   getInWarehousing(id).then((res) => {
     const { code, data } = res
     if (code == 200) {
+      console.log(res)
       open.value = true
       title.value = '修改入库信息'
       opertype.value = 2
@@ -1015,6 +1174,8 @@ const Receiptcolumns = ref([
   { visible: true, align: 'center', type: '', prop: 'supplierId', label: '供应商', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'mark', label: '备注', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'hisBuyCode', label: 'His采购单号', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'decode', label: '供应商送货单', showOverflowTooltip: true },
+
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }
 ])
 const Receipttotal = ref(0)
@@ -1328,10 +1489,10 @@ const Codecolumns = ref([
   { visible: false, align: 'center', type: '', prop: 'drugId', label: '药品id' },
   { visible: false, align: 'center', type: '', prop: 'inWarehouseId', label: '入库药品id' },
   { visible: true, align: 'center', type: '', prop: 'code', label: '追溯码', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'physicTypeDesc', label: '药品类型描述', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'physicTypeDesc', label: '药品类型描述', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'refEntId', label: '企业id', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'entName', label: '企业名称', showOverflowTooltip: true },
-  { visible: false, align: 'center', type: '', prop: 'packageLevel', label: '码等级', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'entName', label: '企业名称', showOverflowTooltip: true },
+  { visible: true, align: 'center', type: '', prop: 'packageLevel', label: '码等级', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'physicName', label: '药品名称', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'exprie', label: '有效期', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'drugEntBaseInfoId', label: '药品id', showOverflowTooltip: true },
@@ -1339,9 +1500,9 @@ const Codecolumns = ref([
   { visible: false, align: 'center', type: '', prop: 'pkgSpecCrit', label: '包装规格', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'prepnSpec', label: '制剂规格', showOverflowTooltip: true },
   { visible: false, align: 'center', type: '', prop: 'prepnTypeDesc', label: '剂型描述', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'produceDateStr', label: '生产日期', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'pkgAmount', label: '最小包装数量', showOverflowTooltip: true },
-  { visible: true, align: 'center', type: '', prop: 'expireDate', label: '有效期至', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'produceDateStr', label: '生产日期', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'pkgAmount', label: '最小包装数量', showOverflowTooltip: true },
+  { visible: false, align: 'center', type: '', prop: 'expireDate', label: '有效期至', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'batchNo', label: '批次号', showOverflowTooltip: true },
   { visible: true, align: 'center', type: '', prop: 'parentCode', label: '父码', showOverflowTooltip: true },
   //{ visible: false, prop: 'actions', label: '操作', type: 'slot', width: '160' }

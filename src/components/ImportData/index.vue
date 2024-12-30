@@ -18,7 +18,7 @@
       <template #tip>
         <div class="el-upload__tip text-center">
           <span>仅允许导入xls、xlsx格式文件。</span>
-          <el-link type="primary" @click="importTemplate" icon="Bottom"> 下载模板 </el-link>
+          <!-- <el-link type="primary" @click="importTemplate" icon="Bottom"> 下载模板 </el-link> -->
         </div>
       </template>
     </el-upload>
